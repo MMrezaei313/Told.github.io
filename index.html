@@ -5,8 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>سیستم گزارش روزانه تولید - کارخانجات شیشه قزوین</title>
     <meta name="theme-color" content="#2c3e50">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.rtl.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         :root {
             --primary-color: #3498db;
@@ -14,6 +17,7 @@
             --success-color: #27ae60;
             --warning-color: #f39c12;
             --danger-color: #e74c3c;
+            --light-color: #ecf0f1;
             --gradient-start: #2c3e50;
             --gradient-end: #4ca1af;
         }
@@ -248,6 +252,237 @@
             background-color: rgba(52, 152, 219, 0.1);
         }
 
+        .attendance-item {
+            border-radius: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            padding: 15px;
+            border: 1px solid #ddd;
+        }
+
+        .attendance-item:hover {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .stats-box {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .stats-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .stats-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin: 10px 0;
+        }
+
+        .stats-title {
+            font-size: 1.1rem;
+            color: var(--secondary-color);
+            font-weight: 500;
+        }
+
+        .present-personnel {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .personnel-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            margin: 8px 0;
+            background: #f8f9fa;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .personnel-item:hover {
+            background: #e9ecef;
+            transform: translateX(-5px);
+        }
+
+        .shift-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-left: 10px;
+        }
+
+        .shift-a {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .shift-b {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+        }
+
+        .shift-c {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .koor-header {
+            background: linear-gradient(135deg, #e9ecef, #dee2e6);
+            font-weight: bold;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border-right: 4px solid var(--primary-color);
+        }
+
+        .print-btn {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            z-index: 100;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+            background: linear-gradient(135deg, var(--primary-color), #1a73e8);
+            color: white;
+            font-size: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .print-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .status-badge {
+            padding: 7px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        .report-table th, 
+        .report-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .report-table th {
+            background-color: #2c3e50;
+            color: white;
+            font-weight: bold;
+        }
+
+        .report-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .report-table tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .report-table tfoot {
+            font-weight: bold;
+            background-color: #eaf2f8;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 25px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 900px;
+            border-radius: 8px;
+            position: relative;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        .close {
+            color: #aaa;
+            float: left;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            position: absolute;
+            left: 15px;
+            top: 10px;
+        }
+
+        .close:hover {
+            color: black;
+        }
+
+        .date-range {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .date-range label {
+            font-weight: bold;
+        }
+
+        .date-range input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        #generate-report {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        #generate-report:hover {
+            background-color: #219653;
+        }
+
         @media (max-width: 768px) {
             .form-group {
                 flex-direction: column;
@@ -274,6 +509,55 @@
                 width: 100%;
                 margin: 2px 0;
                 border-radius: 5px;
+            }
+            
+            .report-table {
+                font-size: 12px;
+            }
+            
+            .report-table th, 
+            .report-table td {
+                padding: 6px;
+            }
+            
+            .modal-content {
+                width: 95%;
+                margin: 10% auto;
+                padding: 15px;
+            }
+        }
+
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .tab-content.active, .tab-content.active * {
+                visibility: visible;
+            }
+            .tab-content.active {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: auto;
+                margin: 0;
+                padding: 20px;
+                box-shadow: none;
+            }
+            .button-group {
+                display: none;
+            }
+            .tabs {
+                display: none;
+            }
+            .header {
+                display: none;
+            }
+            .logout-btn {
+                display: none;
+            }
+            .no-print {
+                display: none !important;
             }
         }
     </style>
@@ -310,7 +594,7 @@
             <button class="logout-btn" onclick="logout()">خروج</button>
         </div>
 
-        <ul class="nav nav-tabs mb-4" id="mainTabs">
+        <ul class="nav nav-tabs mb-4 no-print" id="mainTabs">
             <li class="nav-item">
                 <button class="nav-link active" id="production-tab" onclick="switchTab('production')">
                     <i class="bi bi-gear-fill me-2"></i>گزارش تولید
@@ -321,7 +605,7 @@
                     <i class="bi bi-people-fill me-2"></i>حضور و غیاب
                 </button>
             </li>
-            <li class="nav-item" id="reports-tab-item" style="display: none;">
+            <li class="nav-item" id="reports-tab-item">
                 <button class="nav-link" id="reports-tab" onclick="switchTab('reports')">
                     <i class="bi bi-graph-up me-2"></i>گزارشات
                 </button>
@@ -338,7 +622,7 @@
                 <div class="form-container">
                     <div class="form-group">
                         <label for="k1-date">تاریخ:</label>
-                        <input type="date" id="k1-date" class="form-control">
+                        <input type="text" id="k1-date" class="form-control date-picker">
                     </div>
                     
                     <div class="form-group">
@@ -414,7 +698,7 @@
                         <button onclick="calculateKoor1()">محاسبه</button>
                         <button onclick="saveKoor1()">ذخیره</button>
                         <button onclick="printKoor1()">چاپ</button>
-                        <button onclick="showKoor1Reports()" id="k1-report-btn" style="display: none;">گزارش بازه زمانی</button>
+                        <button onclick="showKoor1Reports()" id="k1-report-btn">گزارش بازه زمانی</button>
                     </div>
                     
                     <div id="k1-results" class="results">
@@ -427,7 +711,7 @@
                 <div class="form-container">
                     <div class="form-group">
                         <label for="k2-date">تاریخ:</label>
-                        <input type="date" id="k2-date" class="form-control">
+                        <input type="text" id="k2-date" class="form-control date-picker">
                     </div>
                     
                     <div class="form-group">
@@ -558,7 +842,7 @@
                         <button onclick="calculateKoor2()">محاسبه</button>
                         <button onclick="saveKoor2()">ذخیره</button>
                         <button onclick="printKoor2()">چاپ</button>
-                        <button onclick="showKoor2Reports()" id="k2-report-btn" style="display: none;">گزارش بازه زمانی</button>
+                        <button onclick="showKoor2Reports()" id="k2-report-btn">گزارش بازه زمانی</button>
                     </div>
                     
                     <div id="k2-results" class="results">
@@ -570,23 +854,182 @@
 
         <div id="attendance" class="tab-content">
             <div class="container">
-                <div class="alert alert-info">
-                    <h4 class="alert-heading">سیستم حضور و غیاب</h4>
-                    <p>این بخش در حال توسعه است و به زودی در دسترس خواهد بود.</p>
+                <div class="present-personnel no-print" id="attendance-present-personnel">
+                    <h4 class="mb-3">پرسنل حاضر در شیفت جاری (<span id="current-shift-type"></span>)</h4>
+                    <div class="row" id="present-personnel-list">
+                        <!-- پرسنل حاضر اینجا نمایش داده می‌شود -->
+                    </div>
+                </div>
+
+                <div class="row no-print" id="attendance-stats">
+                    <div class="col-md-3">
+                        <div class="stats-box">
+                            <div class="stats-title">تعداد پرسنل</div>
+                            <div class="stats-number" id="total-personnel">0</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stats-box">
+                            <div class="stats-title">ثبت‌های امروز</div>
+                            <div class="stats-number" id="today-records">0</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stats-box">
+                            <div class="stats-title">حاضران</div>
+                            <div class="stats-number" id="present-count">0</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stats-box">
+                            <div class="stats-title">مرخصی</div>
+                            <div class="stats-number" id="leave-count">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">ثبت حضور و غیاب شیفت</div>
+                    <div class="card-body">
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <label for="attendance-date" class="form-label">تاریخ</label>
+                                <input type="text" class="form-control date-picker" id="attendance-date">
+                                <div class="persian-date mt-2" id="attendance-jalali-date"></div>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="attendance-shift-type" class="form-label">نوع شیفت</label>
+                                <select class="form-select" id="attendance-shift-type">
+                                    <option value="صبح (۶-۱۴)">صبح (۶-۱۴)</option>
+                                    <option value="عصر (۱۴-۲۲)">عصر (۱۴-۲۲)</option>
+                                    <option value="شب (۲۲-۶)">شب (۲۲-۶)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="attendance-shift-group" class="form-label">گروه شیفت</label>
+                                <select class="form-select" id="attendance-shift-group">
+                                    <option value="A">شیفت A</option>
+                                    <option value="B">شیفت B</option>
+                                    <option value="C">شیفت C</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="attendance-supervisor" class="form-label">سرپرست شیفت</label>
+                                <select class="form-select" id="attendance-supervisor">
+                                    <!-- سرپرستان اینجا لود می‌شوند -->
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="attendance-positions-container">
+                            <!-- پست‌های سازمانی اینجا لود می‌شوند -->
+                        </div>
+
+                        <button class="btn btn-success mt-4 no-print" onclick="saveAttendance()">
+                            <i class="bi bi-check-circle-fill me-2"></i>ذخیره اطلاعات حضور و غیاب
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div id="reports" class="tab-content">
-            <div class="container">
-                <div class="alert alert-info">
-                    <h4 class="alert-heading">سیستم گزارش‌گیری</h4>
-                    <p>این بخش در حال توسعه است و به زودی در دسترس خواهد بود.</p>
+            <div class="card">
+                <div class="card-header">گزارشات جامع تولید و حضور و غیاب</div>
+                <div class="card-body">
+                    <div class="row mb-4 no-print">
+                        <div class="col-md-3">
+                            <label for="report-type" class="form-label">نوع گزارش</label>
+                            <select class="form-select" id="report-type" onchange="toggleReportFilters()">
+                                <option value="production">گزارش تولید</option>
+                                <option value="attendance">گزارش حضور و غیاب</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="report-koor" class="form-label" id="report-koor-label">کوره</label>
+                            <select class="form-select" id="report-koor">
+                                <option value="koor1">کوره ۱</option>
+                                <option value="koor2">کوره ۲</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="report-start-date" class="form-label">از تاریخ</label>
+                            <input type="text" class="form-control date-picker" id="report-start-date">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="report-end-date" class="form-label">تا تاریخ</label>
+                            <input type="text" class="form-control date-picker" id="report-end-date">
+                        </div>
+                    </div>
+                    <div class="row mb-4 no-print" id="attendance-report-filters" style="display: none;">
+                        <div class="col-md-4">
+                            <label for="report-shift-type" class="form-label">شیفت</label>
+                            <select class="form-select" id="report-shift-type">
+                                <option value="">همه شیفت‌ها</option>
+                                <option value="صبح (۶-۱۴)">صبح (۶-۱۴)</option>
+                                <option value="عصر (۱۴-۲۲)">عصر (۱۴-۲۲)</option>
+                                <option value="شب (۲۲-۶)">شب (۲۲-۶)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="report-shift-group" class="form-label">گروه شیفت</label>
+                            <select class="form-select" id="report-shift-group">
+                                <option value="">همه گروه‌ها</option>
+                                <option value="A">شیفت A</option>
+                                <option value="B">شیفت B</option>
+                                <option value="C">شیفت C</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-4 no-print">
+                        <div class="col-12 text-center">
+                            <button class="btn btn-primary" onclick="generateReport()">
+                                <i class="bi bi-file-earmark-bar-graph me-2"></i>تولید گزارش
+                            </button>
+                            <button class="btn btn-success ms-2" onclick="exportPDF()" id="export-pdf-btn" style="display: none;">
+                                <i class="bi bi-file-earmark-pdf me-2"></i>خروجی PDF
+                            </button>
+                            <button class="btn btn-warning ms-2" onclick="exportExcel()" id="export-excel-btn" style="display: none;">
+                                <i class="bi bi-file-earmark-excel me-2"></i>خروجی Excel
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="print-section" id="report-results">
+                        <!-- نتایج گزارش اینجا نمایش داده می‌شود -->
+                    </div>
                 </div>
             </div>
         </div>
+
+        <!-- مودال گزارشات -->
+        <div id="report-modal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal()">&times;</span>
+                <h2 id="modal-title">گزارش بازه زمانی</h2>
+                <div class="modal-body">
+                    <div class="date-range">
+                        <label for="from-date">از تاریخ:</label>
+                        <input type="text" id="from-date" class="date-picker">
+                        <label for="to-date">تا تاریخ:</label>
+                        <input type="text" id="to-date" class="date-picker">
+                        <button id="generate-report" onclick="generateModalReport()">تولید گزارش</button>
+                    </div>
+                    <div id="modal-report-results"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- دکمه پرینت -->
+        <div class="print-btn no-print" onclick="printPage()" title="چاپ گزارش">
+            <i class="bi bi-printer-fill"></i>
+        </div>
     </div>
 
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/persian-date@1.1.0/dist/persian-date.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // سیستم کاربران با سطوح دسترسی
         const users = {
@@ -600,6 +1043,29 @@
         // متغیرهای گزارشات
         let koor1Reports = JSON.parse(localStorage.getItem('koor1Reports')) || [];
         let koor2Reports = JSON.parse(localStorage.getItem('koor2Reports')) || [];
+        let attendanceRecords = JSON.parse(localStorage.getItem('attendanceRecords')) || [];
+        let personnels = JSON.parse(localStorage.getItem('personnels')) || [];
+
+        // تعریف پست‌های سازمانی
+        const koorPositions = {
+            "کوره یک": [
+                "ذوبکار کوره یک",
+                "متصدی ماشین خط یک",
+                "متصدی لهر خط یک",
+                "متصدی برش و شیشه گیری خط یک",
+                "سرپرست کوره یک"
+            ],
+            "کوره دو": [
+                "ذوبکار کوره دو",
+                "متصدی ماشین خط دو",
+                "متصدی ماشین خط سه",
+                "متصدی لهر خط دو",
+                "متصدی لهر خط سه",
+                "متصدی برش خط دو و سه",
+                "شیشه گیری خط دو و سه",
+                "سرپرست کوره دو"
+            ]
+        };
 
         // تابع ورود به سیستم
         function login() {
@@ -628,11 +1094,8 @@
                 `;
                 
                 setupAccessControls(user.role);
-                
-                // تنظیم تاریخ امروز به عنوان پیش‌فرض
-                const today = new Date().toISOString().split('T')[0];
-                document.getElementById('k1-date').value = today;
-                document.getElementById('k2-date').value = today;
+                loadPersianDatepicker();
+                initializeAttendanceData();
             } else {
                 alert('نام کاربری یا رمز عبور نامعتبر است');
             }
@@ -666,6 +1129,33 @@
             
             // نمایش/پنهان کردن تب گزارشات
             document.getElementById('reports-tab-item').style.display = (isAdmin || isDirector) ? 'block' : 'none';
+            
+            // فعال کردن/غیرفعال کردن قابلیت ویرایش برای سرپرستان
+            if (isSupervisor) {
+                const inputs = document.querySelectorAll('input, select');
+                inputs.forEach(input => {
+                    if (!input.id.includes('report-')) {
+                        input.disabled = false;
+                    }
+                });
+            }
+        }
+
+        function loadPersianDatepicker() {
+            $(".date-picker").persianDatepicker({
+                format: 'YYYY/MM/DD',
+                observer: true,
+                initialValue: true
+            });
+            
+            // تنظیم تاریخ پیش‌فرض برای گزارش
+            const sevenDaysAgo = new Date();
+            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+            const sevenDaysAgoStr = sevenDaysAgo.toISOString().split('T')[0];
+            $("#report-start-date").persianDatepicker('setDate', [sevenDaysAgo.getFullYear(), sevenDaysAgo.getMonth() + 1, sevenDaysAgo.getDate()].join('/'));
+            
+            const today = new Date();
+            $("#report-end-date").persianDatepicker('setDate', [today.getFullYear(), today.getMonth() + 1, today.getDate()].join('/'));
         }
 
         function switchTab(tabName) {
@@ -747,7 +1237,7 @@
                     <strong>پودر سیلیس:</strong> ${silica.toFixed(2)} کیلوگرم
                 </div>
                 <div class="result-item">
-                    <strong>کربنات سدیم:</strong> ${sodiumCarbonate.toFixed(2)} کیلوگرم
+                    <strong>کربنات سدیم:</strong> ${sodiumCarbonate.toFixed(2)} کیلوگرm
                 </div>
                 <div class="result-item">
                     <strong>دولومیت:</strong> ${dolomite.toFixed(2)} کیلوگرم
@@ -801,7 +1291,8 @@
         }
 
         function showKoor1Reports() {
-            alert("این بخش در حال توسعه است و به زودی در دسترس خواهد بود.");
+            document.getElementById("modal-title").textContent = "گزارش بازه زمانی کوره ۱";
+            document.getElementById("report-modal").style.display = "block";
         }
 
         // توابع مربوط به کوره 2
@@ -906,7 +1397,7 @@
                 weight1: document.getElementById("k2-weight1").value,
                 thickness1: document.getElementById("k2-thickness1").value,
                 design1: document.getElementById("k2-design1").value,
-                speed1: document.getElementById("k2-speed1").value,
+                speed1: document.getElementById("k2-speed1).value,
                 hours1: document.getElementById("k2-hours1").value,
                 delivery1: document.getElementById("k2-delivery1").value,
                 production1: document.getElementById("k2-production1").value,
@@ -933,7 +1424,707 @@
         }
 
         function showKoor2Reports() {
-            alert("این بخش در حال توسعه است و به زودی در دسترس خواهد بود.");
+            document.getElementById("modal-title").textContent = "گزارش بازه زمانی کوره ۲";
+            document.getElementById("report-modal").style.display = "block";
+        }
+
+        // توابع مربوط به حضور و غیاب
+        function initializeAttendanceData() {
+            // اگر داده‌های پرسنل وجود ندارد، داده‌های نمونه ایجاد کن
+            if (personnels.length === 0) {
+                personnels = [
+                    { id: '1', name: 'علی', family: 'رضایی', personnelCode: '1001', position: 'ذوبکار کوره یک', shiftGroup: 'A', isSupervisor: 'no' },
+                    { id: '2', name: 'محمد', family: 'محمدی', personnelCode: '1002', position: 'متصدی ماشین خط یک', shiftGroup: 'A', isSupervisor: 'no' },
+                    { id: '3', name: 'حسن', family: 'حسینی', personnelCode: '1003', position: 'ذوبکار کوره دو', shiftGroup: 'B', isSupervisor: 'yes' },
+                    { id: '4', name: 'رضا', family: 'کریمی', personnelCode: '1004', position: 'متصدی برش خط دو و سه', shiftGroup: 'C', isSupervisor: 'no' },
+                    { id: '5', name: 'امیر', family: 'جعفری', personnelCode: '1005', position: 'سرپرست کوره یک', shiftGroup: 'A', isSupervisor: 'yes' }
+                ];
+                localStorage.setItem('personnels', JSON.stringify(personnels));
+            }
+            
+            // بارگذاری سرپرستان برای انتخاب
+            loadSupervisors();
+            
+            // بارگذاری پست‌های سازمانی
+            loadPositions();
+            
+            // به روزرسانی آمار
+            updateAttendanceStats();
+        }
+
+        function loadSupervisors() {
+            const supervisorSelect = document.getElementById('attendance-supervisor');
+            supervisorSelect.innerHTML = '';
+            
+            const supervisors = personnels.filter(p => p.isSupervisor === 'yes');
+            supervisors.forEach(supervisor => {
+                const option = document.createElement('option');
+                option.value = supervisor.id;
+                option.textContent = `${supervisor.name} ${supervisor.family}`;
+                supervisorSelect.appendChild(option);
+            });
+        }
+
+        function loadPositions() {
+            const container = document.getElementById('attendance-positions-container');
+            container.innerHTML = '';
+            
+            for (const koor in koorPositions) {
+                const koorHeader = document.createElement('div');
+                koorHeader.className = 'koor-header';
+                koorHeader.textContent = koor;
+                container.appendChild(koorHeader);
+                
+                koorPositions[koor].forEach(position => {
+                    const positionGroup = document.createElement('div');
+                    positionGroup.className = 'mb-3';
+                    
+                    const label = document.createElement('label');
+                    label.className = 'form-label';
+                    label.textContent = position;
+                    positionGroup.appendChild(label);
+                    
+                    // بررسی آیا برای این پست و تاریخ و شیفت ثبت‌ای وجود دارد
+                    const currentDate = $("#attendance-date").val() || new Date().toISOString().split('T')[0];
+                    const currentShiftType = document.getElementById('attendance-shift-type').value;
+                    
+                    const existingRecords = attendanceRecords.filter(record => 
+                        record.position === position && 
+                        record.date === currentDate && 
+                        record.shiftType === currentShiftType
+                    );
+                    
+                    if (existingRecords.length === 0) {
+                        // اگر رکوردی وجود ندارد، یک رکورد جدید ایجاد کن
+                        const newRecord = {
+                            id: Date.now().toString(),
+                            date: currentDate,
+                            shiftType: currentShiftType,
+                            position: position,
+                            personnelId: '',
+                            status: 'present',
+                            overtime: false,
+                            substitute: false,
+                            substituteWith: ''
+                        };
+                        
+                        const recordElement = createAttendanceRecordElement(newRecord, position);
+                        positionGroup.appendChild(recordElement);
+                        
+                        // دکمه افزودن پرسنل دیگر
+                        const addButton = document.createElement('button');
+                        addButton.className = 'btn btn-sm btn-outline-primary mt-2 no-print';
+                        addButton.innerHTML = '<i class="bi bi-plus-circle me-1"></i>افزودن پرسنل دیگر برای این پست';
+                        addButton.onclick = () => addAnotherPersonnel(position);
+                        positionGroup.appendChild(addButton);
+                    } else {
+                        // اگر رکوردهایی وجود دارد، همه را نمایش بده
+                        existingRecords.forEach(record => {
+                            const recordElement = createAttendanceRecordElement(record, position);
+                            positionGroup.appendChild(recordElement);
+                        });
+                        
+                        // دکمه افزودن پرسنل دیگر
+                        const addButton = document.createElement('button');
+                        addButton.className = 'btn btn-sm btn-outline-primary mt-2 no-print';
+                        addButton.innerHTML = '<i class="bi bi-plus-circle me-1"></i>افزودن پرسنل دیگر برای این پست';
+                        addButton.onclick = () => addAnotherPersonnel(position);
+                        positionGroup.appendChild(addButton);
+                    }
+                    
+                    container.appendChild(positionGroup);
+                });
+            }
+        }
+
+        function createAttendanceRecordElement(record, position) {
+            const recordDiv = document.createElement('div');
+            recordDiv.className = 'attendance-item';
+            recordDiv.id = `attendance-${record.id}`;
+            
+            const rowDiv = document.createElement('div');
+            rowDiv.className = 'row align-items-center';
+            
+            const col1 = document.createElement('div');
+            col1.className = 'col-md-4';
+            
+            const select = document.createElement('select');
+            select.className = 'form-select';
+            select.value = record.personnelId;
+            select.onchange = (e) => updateAttendancePersonnel(record, e);
+            
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = 'انتخاب پرسنل';
+            select.appendChild(defaultOption);
+            
+            const personnelOptions = getPersonnelByPosition(position);
+            personnelOptions.forEach(p => {
+                const option = document.createElement('option');
+                option.value = p.id;
+                option.textContent = `${p.name} ${p.family} (${p.personnelCode})`;
+                if (p.id === record.personnelId) option.selected = true;
+                select.appendChild(option);
+            });
+            
+            col1.appendChild(select);
+            rowDiv.appendChild(col1);
+            
+            const col2 = document.createElement('div');
+            col2.className = 'col-md-8';
+            
+            // Radio buttons for status
+            const statusDiv = document.createElement('div');
+            statusDiv.className = 'd-flex flex-wrap gap-3';
+            
+            const presentDiv = document.createElement('div');
+            presentDiv.className = 'form-check';
+            
+            const presentInput = document.createElement('input');
+            presentInput.className = 'form-check-input';
+            presentInput.type = 'radio';
+            presentInput.name = `status_${record.id}`;
+            presentInput.value = 'present';
+            presentInput.checked = record.status === 'present';
+            presentInput.onchange = () => record.status = 'present';
+            
+            const presentLabel = document.createElement('label');
+            presentLabel.className = 'form-check-label';
+            presentLabel.textContent = 'حاضر';
+            
+            presentDiv.appendChild(presentInput);
+            presentDiv.appendChild(presentLabel);
+            
+            const leaveDiv = document.createElement('div');
+            leaveDiv.className = 'form-check';
+            
+            const leaveInput = document.createElement('input');
+            leaveInput.className = 'form-check-input';
+            leaveInput.type = 'radio';
+            leaveInput.name = `status_${record.id}`;
+            leaveInput.value = 'leave';
+            leaveInput.checked = record.status === 'leave';
+            leaveInput.onchange = () => record.status = 'leave';
+            
+            const leaveLabel = document.createElement('label');
+            leaveLabel.className = 'form-check-label';
+            leaveLabel.textContent = 'مرخصی';
+            
+            leaveDiv.appendChild(leaveInput);
+            leaveDiv.appendChild(leaveLabel);
+            
+            statusDiv.appendChild(presentDiv);
+            statusDiv.appendChild(leaveDiv);
+            
+            col2.appendChild(statusDiv);
+            
+            // Checkboxes for overtime and substitute
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = 'd-flex flex-wrap gap-3 mt-2';
+            
+            const overtimeDiv = document.createElement('div');
+            overtimeDiv.className = 'form-check';
+            
+            const overtimeInput = document.createElement('input');
+            overtimeInput.className = 'form-check-input';
+            overtimeInput.type = 'checkbox';
+            overtimeInput.checked = record.overtime;
+            overtimeInput.onchange = (e) => record.overtime = e.target.checked;
+            
+            const overtimeLabel = document.createElement('label');
+            overtimeLabel.className = 'form-check-label';
+            overtimeLabel.textContent = 'اضافه کار';
+            
+            overtimeDiv.appendChild(overtimeInput);
+            overtimeDiv.appendChild(overtimeLabel);
+            
+            const substituteDiv = document.createElement('div');
+            substituteDiv.className = 'form-check';
+            
+            const substituteInput = document.createElement('input');
+            substituteInput.className = 'form-check-input';
+            substituteInput.type = 'checkbox';
+            substituteInput.checked = record.substitute;
+            substituteInput.onchange = (e) => toggleSubstitute(record, e.target.checked);
+            
+            const substituteLabel = document.createElement('label');
+            substituteLabel.className = 'form-check-label';
+            substituteLabel.textContent = 'تعویض';
+            
+            substituteDiv.appendChild(substituteInput);
+            substituteDiv.appendChild(substituteLabel);
+            
+            optionsDiv.appendChild(overtimeDiv);
+            optionsDiv.appendChild(substituteDiv);
+            
+            col2.appendChild(optionsDiv);
+            
+            // Substitute with input
+            if (record.substitute) {
+                const substituteWithDiv = document.createElement('div');
+                substituteWithDiv.className = 'mt-2';
+                
+                const substituteWithInput = document.createElement('input');
+                substituteWithInput.type = 'text';
+                substituteWithInput.className = 'form-control form-control-sm';
+                substituteWithInput.placeholder = 'با چه کسی تعویض شده؟';
+                substituteWithInput.value = record.substituteWith || '';
+                substituteWithInput.onchange = (e) => record.substituteWith = e.target.value;
+                
+                substituteWithDiv.appendChild(substituteWithInput);
+                col2.appendChild(substituteWithDiv);
+            }
+            
+            rowDiv.appendChild(col2);
+            recordDiv.appendChild(rowDiv);
+            
+            return recordDiv;
+        }
+
+        function getPersonnelByPosition(position) {
+            return personnels.filter(p => p.position === position);
+        }
+
+        function updateAttendancePersonnel(record, event) {
+            record.personnelId = event.target.value;
+            const personnel = personnels.find(p => p.id === record.personnelId);
+            if (personnel) {
+                record.personnelName = `${personnel.name} ${personnel.family}`;
+            }
+        }
+
+        function toggleSubstitute(record, isSubstitute) {
+            record.substitute = isSubstitute;
+            if (!isSubstitute) {
+                record.substituteWith = '';
+            }
+            // reload the positions to update the UI
+            loadPositions();
+        }
+
+        function addAnotherPersonnel(position) {
+            const currentDate = $("#attendance-date").val() || new Date().toISOString().split('T')[0];
+            const currentShiftType = document.getElementById('attendance-shift-type').value;
+            
+            const newRecord = {
+                id: Date.now().toString(),
+                date: currentDate,
+                shiftType: currentShiftType,
+                position: position,
+                personnelId: '',
+                status: 'present',
+                overtime: false,
+                substitute: false,
+                substituteWith: ''
+            };
+            
+            attendanceRecords.push(newRecord);
+            localStorage.setItem('attendanceRecords', JSON.stringify(attendanceRecords));
+            
+            // reload the positions to update the UI
+            loadPositions();
+        }
+
+        function saveAttendance() {
+            localStorage.setItem('attendanceRecords', JSON.stringify(attendanceRecords));
+            updateAttendanceStats();
+            alert('اطلاعات حضور و غیاب با موفقیت ذخیره شد.');
+        }
+
+        function updateAttendanceStats() {
+            // به روزرسانی آمار حضور و غیاب
+            document.getElementById('total-personnel').textContent = personnels.length;
+            
+            const today = new Date().toISOString().split('T')[0];
+            const todayRecords = attendanceRecords.filter(record => record.date === today);
+            document.getElementById('today-records').textContent = todayRecords.length;
+            
+            const presentRecords = attendanceRecords.filter(record => record.status === 'present');
+            document.getElementById('present-count').textContent = presentRecords.length;
+            
+            const leaveRecords = attendanceRecords.filter(record => record.status === 'leave');
+            document.getElementById('leave-count').textContent = leaveRecords.length;
+            
+            // به روزرسانی لیست پرسنل حاضر
+            updatePresentPersonnelList();
+        }
+
+        function updatePresentPersonnelList() {
+            const currentDate = $("#attendance-date").val() || new Date().toISOString().split('T')[0];
+            const currentShiftType = document.getElementById('attendance-shift-type').value;
+            document.getElementById('current-shift-type').textContent = currentShiftType;
+            
+            const presentRecords = attendanceRecords.filter(record => 
+                record.date === currentDate && 
+                record.shiftType === currentShiftType &&
+                record.status === 'present'
+            );
+            
+            const presentList = document.getElementById('present-personnel-list');
+            presentList.innerHTML = '';
+            
+            if (presentRecords.length === 0) {
+                presentList.innerHTML = '<div class="col-12"><div class="alert alert-info text-center">هیچ پرسنلی برای شیفت جاری ثبت نشده است.</div></div>';
+                return;
+            }
+            
+            presentRecords.forEach(record => {
+                const personnel = personnels.find(p => p.id === record.personnelId);
+                if (personnel) {
+                    const col = document.createElement('div');
+                    col.className = 'col-md-4';
+                    
+                    const personnelItem = document.createElement('div');
+                    personnelItem.className = 'personnel-item';
+                    
+                    const infoDiv = document.createElement('div');
+                    infoDiv.innerHTML = `
+                        <strong>${personnel.name} ${personnel.family}</strong>
+                        <div class="text-muted small">${personnel.position}</div>
+                    `;
+                    
+                    const badge = document.createElement('span');
+                    badge.className = `shift-badge shift-${personnel.shiftGroup.toLowerCase()}`;
+                    badge.textContent = personnel.shiftGroup;
+                    
+                    personnelItem.appendChild(infoDiv);
+                    personnelItem.appendChild(badge);
+                    col.appendChild(personnelItem);
+                    presentList.appendChild(col);
+                }
+            });
+        }
+
+        // توابع گزارش‌گیری
+        function toggleReportFilters() {
+            const reportType = document.getElementById('report-type').value;
+            const koorLabel = document.getElementById('report-koor-label');
+            const attendanceFilters = document.getElementById('attendance-report-filters');
+            
+            if (reportType === 'production') {
+                koorLabel.textContent = 'کوره';
+                attendanceFilters.style.display = 'none';
+            } else {
+                koorLabel.textContent = 'نوع گزارش';
+                attendanceFilters.style.display = 'flex';
+            }
+        }
+
+        function generateReport() {
+            const reportType = document.getElementById('report-type').value;
+            const koor = document.getElementById('report-koor').value;
+            const startDate = $("#report-start-date").val();
+            const endDate = $("#report-end-date").val();
+            
+            if (!startDate || !endDate) {
+                alert("لطفاً بازه زمانی را مشخص کنید");
+                return;
+            }
+            
+            let html = '';
+            
+            if (reportType === 'production') {
+                // تولید گزارش تولید
+                const reports = koor === 'koor1' ? koor1Reports : koor2Reports;
+                const filteredReports = reports.filter(report => {
+                    return report.date >= startDate && report.date <= endDate;
+                });
+                
+                if (filteredReports.length === 0) {
+                    html = "<p>گزارشی برای بازه انتخابی یافت نشد</p>";
+                } else {
+                    html = `
+                        <div class="report-header text-center mb-4">
+                            <h3>گزارش تولید ${koor === 'koor1' ? 'کوره ۱' : 'کوره ۲'}</h3>
+                            <p>بازه زمانی: ${startDate} تا ${endDate}</p>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="report-table">
+                                <thead>
+                                    <tr>
+                                        <th>تاریخ</th>
+                                        <th>شیفت</th>
+                                        <th>کاربر</th>
+                                        <th>تولید (m²)</th>
+                                        <th>ذوب (kg)</th>
+                                        <th>بچ (kg)</th>
+                                        <th>خرده شیشه (kg)</th>
+                                        <th>درصد خرده</th>
+                                        <th>راندمان (%)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                    `;
+                    
+                    let totalProduction = 0;
+                    let totalMelt = 0;
+                    let totalBatch = 0;
+                    let totalCullet = 0;
+                    let totalEfficiency = 0;
+                    
+                    filteredReports.forEach(report => {
+                        html += `
+                            <tr>
+                                <td>${report.date}</td>
+                                <td>${report.shift}</td>
+                                <td>${report.enteredBy}</td>
+                                <td>${report.production}</td>
+                                <td>${report.dailyMelt.toFixed(2)}</td>
+                                <td>${report.batchConsumption.toFixed(2)}</td>
+                                <td>${report.culletConsumption.toFixed(2)}</td>
+                                <td>${report.culletPercentage.toFixed(2)}</td>
+                                <td>${report.efficiency.toFixed(2)}</td>
+                            </tr>
+                        `;
+                        
+                        totalProduction += parseFloat(report.production);
+                        totalMelt += report.dailyMelt;
+                        totalBatch += report.batchConsumption;
+                        totalCullet += report.culletConsumption;
+                        totalEfficiency += report.efficiency;
+                    });
+                    
+                    const avgEfficiency = totalEfficiency / filteredReports.length;
+                    
+                    html += `
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="3"><strong>جمع کل/میانگین</strong></td>
+                                        <td>${totalProduction.toFixed(2)}</td>
+                                        <td>${totalMelt.toFixed(2)}</td>
+                                        <td>${totalBatch.toFixed(2)}</td>
+                                        <td>${totalCullet.toFixed(2)}</td>
+                                        <td></td>
+                                        <td>${avgEfficiency.toFixed(2)}</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    `;
+                }
+            } else {
+                // تولید گزارش حضور و غیاب
+                const shiftType = document.getElementById('report-shift-type').value;
+                const shiftGroup = document.getElementById('report-shift-group').value;
+                
+                let filteredRecords = attendanceRecords.filter(record => {
+                    return record.date >= startDate && record.date <= endDate;
+                });
+                
+                if (shiftType) {
+                    filteredRecords = filteredRecords.filter(record => record.shiftType === shiftType);
+                }
+                
+                if (shiftGroup) {
+                    filteredRecords = filteredRecords.filter(record => {
+                        const personnel = personnels.find(p => p.id === record.personnelId);
+                        return personnel && personnel.shiftGroup === shiftGroup;
+                    });
+                }
+                
+                if (filteredRecords.length === 0) {
+                    html = "<p>گزارشی برای بازه انتخابی یافت نشد</p>";
+                } else {
+                    html = `
+                        <div class="report-header text-center mb-4">
+                            <h3>گزارش حضور و غیاب پرسنل</h3>
+                            <p>بازه زمانی: ${startDate} تا ${endDate}</p>
+                            ${shiftType ? `<p>شیفت: ${shiftType}</p>` : ''}
+                            ${shiftGroup ? `<p>گروه شیفت: ${shiftGroup}</p>` : ''}
+                        </div>
+                        <div class="table-responsive">
+                            <table class="report-table">
+                                <thead>
+                                    <tr>
+                                        <th>تاریخ</th>
+                                        <th>شیفت</th>
+                                        <th>پرسنل</th>
+                                        <th>پست سازمانی</th>
+                                        <th>وضعیت</th>
+                                        <th>اضافه کار</th>
+                                        <th>تعویض با</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                    `;
+                    
+                    filteredRecords.forEach(record => {
+                        const personnel = personnels.find(p => p.id === record.personnelId);
+                        const personnelName = personnel ? `${personnel.name} ${personnel.family}` : 'نامشخص';
+                        
+                        html += `
+                            <tr>
+                                <td>${record.date}</td>
+                                <td>${record.shiftType}</td>
+                                <td>${personnelName}</td>
+                                <td>${record.position}</td>
+                                <td>
+                                    <span class="status-badge ${record.status === 'present' ? 'bg-success' : 'bg-warning'}">
+                                        ${record.status === 'present' ? 'حاضر' : 'مرخصی'}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info" style="display: ${record.overtime ? 'inline-block' : 'none'}">اضافه کار</span>
+                                </td>
+                                <td>${record.substituteWith || '-'}</td>
+                            </tr>
+                        `;
+                    });
+                    
+                    html += `
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                }
+            }
+            
+            document.getElementById('report-results').innerHTML = html;
+            document.getElementById('export-pdf-btn').style.display = 'inline-block';
+            document.getElementById('export-excel-btn').style.display = 'inline-block';
+        }
+
+        function generateModalReport() {
+            const fromDate = document.getElementById("from-date").value;
+            const toDate = document.getElementById("to-date").value;
+            const modalTitle = document.getElementById("modal-title").textContent;
+            const isKoor1 = modalTitle.includes("کوره ۱");
+            
+            if (!fromDate || !toDate) {
+                alert("لطفاً بازه زمانی را مشخص کنید");
+                return;
+            }
+
+            const reports = isKoor1 ? koor1Reports : koor2Reports;
+            const filteredReports = reports.filter(report => {
+                return report.date >= fromDate && report.date <= toDate;
+            });
+
+            if (filteredReports.length === 0) {
+                document.getElementById("modal-report-results").innerHTML = "<p>گزارشی برای بازه انتخابی یافت نشد</p>";
+                return;
+            }
+
+            let html = `
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>تاریخ</th>
+                            <th>شیفت</th>
+                            <th>کاربر</th>
+                            <th>تولید (m²)</th>
+                            <th>ذوب (kg)</th>
+                            <th>بچ (kg)</th>
+                            <th>خرده شیشه (kg)</th>
+                            <th>درصد خرده</th>
+                            <th>راندمان (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            let totalProduction = 0;
+            let totalMelt = 0;
+            let totalBatch = 0;
+            let totalCullet = 0;
+            let totalEfficiency = 0;
+
+            filteredReports.forEach(report => {
+                html += `
+                    <tr>
+                        <td>${report.date}</td>
+                        <td>${report.shift}</td>
+                        <td>${report.enteredBy}</td>
+                        <td>${report.production}</td>
+                        <td>${report.dailyMelt.toFixed(2)}</td>
+                        <td>${report.batchConsumption.toFixed(2)}</td>
+                        <td>${report.culletConsumption.toFixed(2)}</td>
+                        <td>${report.culletPercentage.toFixed(2)}</td>
+                        <td>${report.efficiency.toFixed(2)}</td>
+                    </tr>
+                `;
+
+                totalProduction += parseFloat(report.production);
+                totalMelt += report.dailyMelt;
+                totalBatch += report.batchConsumption;
+                totalCullet += report.culletConsumption;
+                totalEfficiency += report.efficiency;
+            });
+
+            const avgEfficiency = totalEfficiency / filteredReports.length;
+
+            html += `
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3"><strong>جمع کل/میانگین</strong></td>
+                            <td>${totalProduction.toFixed(2)}</td>
+                            <td>${totalMelt.toFixed(2)}</td>
+                            <td>${totalBatch.toFixed(2)}</td>
+                            <td>${totalCullet.toFixed(2)}</td>
+                            <td></td>
+                            <td>${avgEfficiency.toFixed(2)}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            `;
+
+            document.getElementById("modal-report-results").innerHTML = html;
+        }
+
+        function exportPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // اضافه کردن عنوان به PDF
+            doc.setFontSize(18);
+            doc.text('گزارش تولید کارخانجات شیشه قزوین', 105, 15, { align: 'center' });
+            doc.setFontSize(12);
+            doc.text('تاریخ گزارش: ' + new Date().toLocaleDateString('fa-IR'), 105, 22, { align: 'center' });
+            
+            // گرفتن محتوای گزارش
+            const reportContent = document.getElementById('report-results');
+            
+            // اضافه کردن محتوا به PDF
+            doc.setFontSize(10);
+            const content = reportContent.textContent || reportContent.innerText;
+            const lines = doc.splitTextToSize(content, 180);
+            doc.text(lines, 10, 30);
+            
+            // ذخیره PDF
+            doc.save('گزارش_تولید.pdf');
+        }
+
+        function exportExcel() {
+            // ایجاد یک workbook جدید
+            const wb = XLSX.utils.book_new();
+            
+            // گرفتن داده‌های جدول
+            const table = document.getElementById('report-results').querySelector('table');
+            const ws = XLSX.utils.table_to_sheet(table);
+            
+            // اضافه کردن worksheet به workbook
+            XLSX.utils.book_append_sheet(wb, ws, 'گزارش تولید');
+            
+            // ذخیره فایل Excel
+            XLSX.writeFile(wb, 'گزارش_تولید.xlsx');
+        }
+
+        // توابع عمومی
+        function closeModal() {
+            document.getElementById("report-modal").style.display = "none";
+        }
+
+        function printPage() {
+            window.print();
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById("report-modal");
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
         }
 
         // بررسی وضعیت لاگین هنگام بارگذاری صفحه
@@ -952,11 +2143,14 @@
                 // بارگذاری تاریخچه گزارشات
                 koor1Reports = JSON.parse(localStorage.getItem('koor1Reports')) || [];
                 koor2Reports = JSON.parse(localStorage.getItem('koor2Reports')) || [];
+                attendanceRecords = JSON.parse(localStorage.getItem('attendanceRecords')) || [];
+                personnels = JSON.parse(localStorage.getItem('personnels')) || [];
                 
-                // تنظیم تاریخ امروز به عنوان پیش‌فرض
-                const today = new Date().toISOString().split('T')[0];
-                document.getElementById('k1-date').value = today;
-                document.getElementById('k2-date').value = today;
+                // فعال‌سازی تقویم شمسی
+                loadPersianDatepicker();
+                
+                // مقداردهی اولیه بخش حضور و غیاب
+                initializeAttendanceData();
             }
         };
     </script>
