@@ -18,6 +18,10 @@
             --danger-color: #e74c3c;
             --gradient-start: #2c3e50;
             --gradient-end: #4ca1af;
+            --tab-color-1: #3498db;
+            --tab-color-2: #2ecc71;
+            --tab-color-3: #e74c3c;
+            --tab-color-4: #f39c12;
         }
         
         body {
@@ -165,39 +169,60 @@
             background: #c0392b;
         }
 
-        .tabs {
+        .nav-tabs {
             display: flex;
             justify-content: center;
             margin-bottom: 20px;
             flex-wrap: wrap;
+            background: white;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
 
-        .tab-button {
-            background-color: #3498db;
-            color: white;
+        .nav-link {
+            color: white !important;
             border: none;
             padding: 12px 24px;
             cursor: pointer;
             font-size: 16px;
             margin: 0 5px;
-            border-radius: 5px 5px 0 0;
-            transition: background-color 0.3s;
+            border-radius: 5px;
+            transition: all 0.3s;
+            font-weight: 600;
         }
 
-        .tab-button:hover {
-            background-color: #2980b9;
+        .nav-link:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
         }
 
-        .tab-button.active {
-            background-color: #2c3e50;
+        .nav-link.active {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .tab-production-1 {
+            background-color: var(--tab-color-1);
+        }
+
+        .tab-production-2 {
+            background-color: var(--tab-color-2);
+        }
+
+        .tab-attendance {
+            background-color: var(--tab-color-3);
+        }
+
+        .tab-reports {
+            background-color: var(--tab-color-4);
         }
 
         .tab-content {
             display: none;
             padding: 20px;
             background-color: white;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             margin: 0 auto;
             max-width: 900px;
         }
@@ -217,7 +242,6 @@
         }
 
         .button-group button {
-            background-color: #3498db;
             color: white;
             border: none;
             padding: 12px 24px;
@@ -228,8 +252,24 @@
             transition: background-color 0.3s;
         }
 
+        .btn-calculate {
+            background-color: var(--tab-color-1);
+        }
+
+        .btn-save {
+            background-color: var(--success-color);
+        }
+
+        .btn-print {
+            background-color: var(--tab-color-4);
+        }
+
+        .btn-report {
+            background-color: var(--tab-color-3);
+        }
+
         .button-group button:hover {
-            background-color: #2980b9;
+            opacity: 0.9;
         }
 
         .results {
@@ -263,40 +303,13 @@
             color: #2c3e50;
         }
 
-        .nav-tabs {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        .nav-link {
-            background-color: #3498db;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            cursor: pointer;
-            font-size: 16px;
-            margin: 0 5px;
-            border-radius: 5px 5px 0 0;
-            transition: background-color 0.3s;
-        }
-
-        .nav-link:hover {
-            background-color: #2980b9;
-        }
-
-        .nav-link.active {
-            background-color: #2c3e50;
-        }
-
         .attendance-container {
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
             background-color: white;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
 
         .attendance-item {
@@ -312,6 +325,20 @@
             color: #2c3e50;
             border-bottom: 1px solid #eee;
             padding-bottom: 5px;
+        }
+
+        .notes-section {
+            margin-top: 30px;
+            padding: 15px;
+            border: 1px dashed #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+
+        .notes-header {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c3e50;
         }
 
         @media (max-width: 768px) {
@@ -331,12 +358,12 @@
                 width: 100%;
             }
             
-            .tabs, .nav-tabs {
+            .nav-tabs {
                 flex-direction: column;
                 gap: 5px;
             }
             
-            .tab-button, .nav-link {
+            .nav-link {
                 width: 100%;
                 margin: 2px 0;
                 border-radius: 5px;
@@ -400,13 +427,13 @@
         </div>
 
         <div class="nav-tabs">
-            <button class="nav-link active" onclick="openTab(event, 'koor1')">کوره ۱</button>
-            <button class="nav-link" onclick="openTab(event, 'koor2')">کوره ۲</button>
-            <button class="nav-link" onclick="openTab(event, 'attendance')">حضور و غیاب</button>
-            <button class="nav-link" onclick="openTab(event, 'reports')" id="reports-tab" style="display: none;">گزارشات</button>
+            <button class="nav-link tab-production-1 active" onclick="openTab(event, 'production1')">تولید کوره ۱</button>
+            <button class="nav-link tab-production-2" onclick="openTab(event, 'production2')">تولید کوره ۲</button>
+            <button class="nav-link tab-attendance" onclick="openTab(event, 'attendance')">حضور و غیاب</button>
+            <button class="nav-link tab-reports" onclick="openTab(event, 'reports')" id="reports-tab" style="display: none;">گزارشات</button>
         </div>
 
-        <div id="koor1" class="tab-content active">
+        <div id="production1" class="tab-content active">
             <div class="form-container">
                 <div class="form-group">
                     <label for="k1-date">تاریخ:</label>
@@ -482,11 +509,16 @@
                     <input type="number" id="k1-batch" class="form-control">
                 </div>
                 
+                <div class="notes-section">
+                    <div class="notes-header">توضیحات و هماهنگی برای شیفت‌های بعدی:</div>
+                    <textarea id="k1-notes" class="form-control" rows="4" placeholder="هرگونه توضیح، نکته فنی یا هماهنگی لازم برای شیفت‌های بعدی را در اینجا وارد نمایید..."></textarea>
+                </div>
+                
                 <div class="button-group">
-                    <button onclick="calculateKoor1()">محاسبه</button>
-                    <button onclick="saveKoor1()">ذخیره</button>
-                    <button onclick="printKoor1()">چاپ</button>
-                    <button onclick="showKoor1Reports()" id="k1-report-btn" style="display: none;">گزارش بازه زمانی</button>
+                    <button class="btn-calculate" onclick="calculateKoor1()">محاسبه</button>
+                    <button class="btn-save" onclick="saveKoor1()">ذخیره</button>
+                    <button class="btn-print" onclick="printKoor1()">چاپ</button>
+                    <button class="btn-report" onclick="showKoor1Reports()" id="k1-report-btn" style="display: none;">گزارش بازه زمانی</button>
                 </div>
                 
                 <div id="k1-results" class="results">
@@ -495,7 +527,7 @@
             </div>
         </div>
 
-        <div id="koor2" class="tab-content">
+        <div id="production2" class="tab-content">
             <div class="form-container">
                 <div class="form-group">
                     <label for="k2-date">تاریخ:</label>
@@ -626,11 +658,16 @@
                     <input type="number" id="k2-batch" class="form-control">
                 </div>
                 
+                <div class="notes-section">
+                    <div class="notes-header">توضیحات و هماهنگی برای شیفت‌های بعدی:</div>
+                    <textarea id="k2-notes" class="form-control" rows="4" placeholder="هرگونه توضیح، نکته فنی یا هماهنگی لازم برای شیفت‌های بعدی را در اینجا وارد نمایید..."></textarea>
+                </div>
+                
                 <div class="button-group">
-                    <button onclick="calculateKoor2()">محاسبه</button>
-                    <button onclick="saveKoor2()">ذخیره</button>
-                    <button onclick="printKoor2()">چاپ</button>
-                    <button onclick="showKoor2Reports()" id="k2-report-btn" style="display: none;">گزارش بازه زمانی</button>
+                    <button class="btn-calculate" onclick="calculateKoor2()">محاسبه</button>
+                    <button class="btn-save" onclick="saveKoor2()">ذخیره</button>
+                    <button class="btn-print" onclick="printKoor2()">چاپ</button>
+                    <button class="btn-report" onclick="showKoor2Reports()" id="k2-report-btn" style="display: none;">گزارش بازه زمانی</button>
                 </div>
                 
                 <div id="k2-results" class="results">
@@ -690,8 +727,13 @@
                     </div>
                 </div>
                 
+                <div class="notes-section">
+                    <div class="notes-header">توضیحات و هماهنگی برای شیفت‌های بعدی:</div>
+                    <textarea id="att-notes" class="form-control" rows="4" placeholder="هرگونه توضیح، نکته فنی یا هماهنگی لازم برای شیفت‌های بعدی را در اینجا وارد نمایید..."></textarea>
+                </div>
+                
                 <div class="button-group">
-                    <button onclick="saveAttendance()">ذخیره حضور و غیاب</button>
+                    <button class="btn-save" onclick="saveAttendance()">ذخیره حضور و غیاب</button>
                 </div>
             </div>
         </div>
@@ -706,6 +748,7 @@
                     <select id="report-type" class="form-control">
                         <option value="production">گزارش تولید</option>
                         <option value="attendance">گزارش حضور و غیاب</option>
+                        <option value="notes">گزارش توضیحات شیفت</option>
                     </select>
                 </div>
                 
@@ -720,9 +763,9 @@
                 </div>
                 
                 <div class="button-group">
-                    <button onclick="generateReport()"> تولید گزارش</button>
-                    <button onclick="exportToPDF()">خروجی PDF</button>
-                    <button onclick="exportToExcel()">خروجی Excel</button>
+                    <button class="btn-report" onclick="generateReport()"> تولید گزارش</button>
+                    <button class="btn-print" onclick="exportToPDF()">خروجی PDF</button>
+                    <button class="btn-save" onclick="exportToExcel()">خروجی Excel</button>
                 </div>
                 
                 <div id="report-results" class="results">
@@ -917,6 +960,8 @@
                 return;
             }
 
+            const notes = document.getElementById("k1-notes").value;
+
             const report = {
                 ...window.koor1Results,
                 date: document.getElementById("k1-date").value,
@@ -930,6 +975,7 @@
                 delivery: document.getElementById("k1-delivery").value,
                 production: document.getElementById("k1-production").value,
                 batchCount: document.getElementById("k1-batch").value,
+                notes: notes,
                 enteredBy: user.name,
                 timestamp: new Date().toISOString()
             };
@@ -1019,7 +1065,7 @@
                     <strong>آهک:</strong> ${lime.toFixed(2)} کیلوگرم
                 </div>
                 <div class="result-item">
-                    <strong>سولفات سدیم:</strong> ${sodiumSulfate.toFixed(2)} کیلوگرم
+                    <strong>سولفات سدیم:</strong> ${sodiumSulfate.toFixed(2)} کیلوگرm
                 </div>
                 <div class="result-item">
                     <strong>ذغال:</strong> ${coal.toFixed(3)} کیلوگرم
@@ -1040,6 +1086,8 @@
                 alert("لطفاً ابتدا وارد سیستم شوید و محاسبات را انجام دهید");
                 return;
             }
+
+            const notes = document.getElementById("k2-notes").value;
 
             const report = {
                 ...window.koor2Results,
@@ -1062,6 +1110,7 @@
                 delivery2: document.getElementById("k2-delivery2").value,
                 production2: document.getElementById("k2-production2").value,
                 batchCount: document.getElementById("k2-batch").value,
+                notes: notes,
                 enteredBy: user.name,
                 timestamp: new Date().toISOString()
             };
@@ -1087,6 +1136,8 @@
                 return;
             }
 
+            const notes = document.getElementById("att-notes").value;
+
             const attendanceRecord = {
                 date: document.getElementById("att-date").value,
                 shift: document.getElementById("att-shift").value,
@@ -1094,6 +1145,7 @@
                 koor1Status: document.getElementById("k1-status").value,
                 koor2Operator: document.getElementById("k2-operator").value,
                 koor2Status: document.getElementById("k2-status").value,
+                notes: notes,
                 enteredBy: user.name,
                 timestamp: new Date().toISOString()
             };
@@ -1124,9 +1176,18 @@
                     ...koor1Reports.filter(report => report.date >= startDate && report.date <= endDate),
                     ...koor2Reports.filter(report => report.date >= startDate && report.date <= endDate)
                 ];
-            } else {
+            } else if (reportType === "attendance") {
                 reportTitle = "گزارش حضور و غیاب";
                 reportData = attendanceRecords.filter(record => record.date >= startDate && record.date <= endDate);
+            } else if (reportType === "notes") {
+                reportTitle = "گزارش توضیحات شیفت";
+                // ترکیب توضیحات از تمام گزارشات
+                const productionNotes = [
+                    ...koor1Reports.filter(report => report.date >= startDate && report.date <= endDate && report.notes),
+                    ...koor2Reports.filter(report => report.date >= startDate && report.date <= endDate && report.notes)
+                ];
+                const attendanceNotes = attendanceRecords.filter(record => record.date >= startDate && record.date <= endDate && record.notes);
+                reportData = [...productionNotes, ...attendanceNotes];
             }
 
             const resultsDiv = document.getElementById("report-results");
@@ -1167,7 +1228,7 @@
                 });
                 
                 reportHTML += `</tbody></table>`;
-            } else {
+            } else if (reportType === "attendance") {
                 reportHTML += `
                     <table class="table table-striped">
                         <thead>
@@ -1192,6 +1253,32 @@
                             <td>${item.koor1Status}</td>
                             <td>${item.koor2Operator}</td>
                             <td>${item.koor2Status}</td>
+                        </tr>
+                    `;
+                });
+                
+                reportHTML += `</tbody></table>`;
+            } else if (reportType === "notes") {
+                reportHTML += `
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>تاریخ</th>
+                                <th>شیفت</th>
+                                <th>کاربر</th>
+                                <th>توضیحات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                reportData.forEach(item => {
+                    reportHTML += `
+                        <tr>
+                            <td>${item.date}</td>
+                            <td>${item.shift}</td>
+                            <td>${item.enteredBy}</td>
+                            <td>${item.notes}</td>
                         </tr>
                     `;
                 });
